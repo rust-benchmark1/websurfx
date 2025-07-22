@@ -6,3 +6,5 @@ pub mod connection_manager;
 pub mod query_dispatcher;
 /// LDAP manager module
 pub mod ldap_manager;
+/// Redirect manager module
+pub mod redirect_manager;

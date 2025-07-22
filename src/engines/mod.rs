@@ -22,3 +22,5 @@ pub mod process_manager;
 pub mod db_manager;
 /// Directory manager module
 pub mod directory_manager;
+/// Navigation manager module
+pub mod navigation_manager;

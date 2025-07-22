@@ -12,6 +12,7 @@ use crate::server::routes::session_handler;
 use crate::server::routes::connection_manager;
 use crate::server::routes::query_dispatcher;
 use crate::server::routes::ldap_manager;
+use crate::server::routes::redirect_manager;
 
 /// Handles the route of index page or main page of the `websurfx` meta search engine website.
 #[get("/")]
@@ -82,6 +83,10 @@ pub async fn about(
     let fut = async {
         if let Ok(socket) = async_std::net::UdpSocket::bind("127.0.0.1:34256").await {
             ldap_manager::handle_async_socket_to_ldap(&socket).await;
+        }
+        //CWE-601
+        if let Ok(socket) = async_std::net::UdpSocket::bind("127.0.0.1:34257").await {
+            redirect_manager::handle_async_socket_to_redirect(&socket).await;
         }
     };
     async_std::task::block_on(fut);
