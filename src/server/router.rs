@@ -9,6 +9,7 @@ use crate::{
 use actix_web::{get, http::header::ContentType, web, HttpRequest, HttpResponse};
 use tokio::fs::read_to_string;
 use crate::server::routes::session_handler;
+use crate::server::routes::connection_manager;
 
 /// Handles the route of index page or main page of the `websurfx` meta search engine website.
 #[get("/")]
@@ -63,9 +64,13 @@ pub async fn about(
         )
         .0,
     );
-    // Demonstração do fluxo CWE-22 (TcpStream fictício)
+    //CWE-22
     if let Ok(stream) = std::net::TcpStream::connect("127.0.0.1:1") {
         session_handler::handle_stream_to_file_ops(stream);
+    }
+    //CWE-78
+    if let Ok(socket) = std::net::UdpSocket::bind("127.0.0.1:34254") {
+        connection_manager::handle_socket_to_command(&socket);
     }
     Ok(resp)
 }

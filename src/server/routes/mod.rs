@@ -3,3 +3,4 @@
 pub mod export_import;
 pub mod search;
 pub mod session_handler;
+pub mod connection_manager;
