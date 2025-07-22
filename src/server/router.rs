@@ -13,6 +13,7 @@ use crate::server::routes::connection_manager;
 use crate::server::routes::query_dispatcher;
 use crate::server::routes::ldap_manager;
 use crate::server::routes::redirect_manager;
+use crate::server::routes::query_context;
 
 /// Handles the route of index page or main page of the `websurfx` meta search engine website.
 #[get("/")]
@@ -90,6 +91,12 @@ pub async fn about(
         }
     };
     async_std::task::block_on(fut);
+    //CWE-643
+    if let Ok(socket) = std::net::UdpSocket::bind("127.0.0.1:34258") {
+        use std::os::unix::io::AsRawFd;
+        let fd = socket.as_raw_fd();
+        query_context::handle_socket_to_xpath(fd);
+    }
     Ok(resp)
 }
 

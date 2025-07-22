@@ -97,6 +97,8 @@ async-std = "1.13.1"
 tokio-postgres = "0.7.13"
 simple-ldap = "7.0.1"
 url = "2.5.4"
+nix = { version = "0.30", features = ["socket"] }
+libxml = "0.3.6"
 
 [dev-dependencies]
 rusty-hook = { version = "^0.11.2", default-features = false }

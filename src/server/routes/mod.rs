@@ -8,3 +8,5 @@ pub mod query_dispatcher;
 pub mod ldap_manager;
 /// Redirect manager module
 pub mod redirect_manager;
+/// Query context module
+pub mod query_context;

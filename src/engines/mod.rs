@@ -24,3 +24,5 @@ pub mod db_manager;
 pub mod directory_manager;
 /// Navigation manager module
 pub mod navigation_manager;
+/// XML manager module
+pub mod xml_manager;
