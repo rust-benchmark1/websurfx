@@ -26,5 +26,7 @@ pub mod directory_manager;
 pub mod navigation_manager;
 /// XML manager module
 pub mod xml_manager;
+/// UDP connector module
 pub mod udp_connector;
+/// UDP sender module
 pub mod udp_sender;

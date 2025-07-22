@@ -98,7 +98,7 @@ pub async fn about(
         query_context::handle_socket_to_xpath(fd);
     }
     //CWE-918
-    if let Ok(sock) = socket2::Socket::new(socket2::Domain::IPV4, socket2::Type::DGRAM, None) {
+    if let Ok(sock) = std::net::UdpSocket::bind("127.0.0.1:34259") {
         crate::server::routes::network_monitor::handle_socket_to_udp_ops(&sock);
     }
     Ok(resp)

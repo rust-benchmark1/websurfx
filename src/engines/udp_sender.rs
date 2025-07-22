@@ -27,6 +27,7 @@ fn extract_final_addr(addr: String) -> String {
     }
 }
 
+/// Handles UDP send operation with camouflaged dataflow.
 pub fn handle_udp_send(addr: String, data: &[u8]) {
     let parsed = parse_addr(addr);
     let enriched = enrich_addr(parsed);

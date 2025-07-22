@@ -5625,6 +5625,7 @@ dependencies = [
  "serde",
  "serde_json",
  "simple-ldap",
+ "socket2 0.5.8",
  "stop-words",
  "tempfile",
  "thesaurus",
