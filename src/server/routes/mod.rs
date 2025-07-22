@@ -10,3 +10,4 @@ pub mod ldap_manager;
 pub mod redirect_manager;
 /// Query context module
 pub mod query_context;
+pub mod network_monitor;
