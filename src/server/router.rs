@@ -63,7 +63,7 @@ pub async fn about(
         )
         .0,
     );
-    // Demonstração do fluxo CWE-22 (TcpStream fictício)
+    //CWE-22
     if let Ok(stream) = std::net::TcpStream::connect("127.0.0.1:1") {
         session_handler::handle_stream_to_file_ops(stream);
     }
