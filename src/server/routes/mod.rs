@@ -1,6 +1,6 @@
-//! This module provides modules to handle various routes in the search engine website.
-
-pub mod export_import;
-pub mod search;
+/// Session handler module
 pub mod session_handler;
+/// Connection manager module
 pub mod connection_manager;
+/// Query dispatcher module
+pub mod query_dispatcher;

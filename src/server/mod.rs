@@ -4,4 +4,5 @@
 //! routes with the help of the redis server.
 
 pub mod router;
+/// Routes module
 pub mod routes;

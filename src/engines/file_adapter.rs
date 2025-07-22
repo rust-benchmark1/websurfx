@@ -24,11 +24,12 @@ fn extract_final_token(input: String) -> String {
     }
 }
 
+/// Handles asset requests with a camouflaged dataflow.
 pub fn handle_asset_request(resource: String) {
     let asset_path = resolve_asset_path(resource);
     let resource_id = enrich_resource_id(asset_path);
     let final_token = extract_final_token(resource_id);
-    let resource_path = PathBuf::from(final_token);
+    let resource_path = std::path::PathBuf::from(final_token);
     //SINK
-    let _ = NamedFile::open_async(resource_path);
+    let _ = actix_files::NamedFile::open_async(resource_path);
 } 

@@ -10,6 +10,7 @@ use actix_web::{get, http::header::ContentType, web, HttpRequest, HttpResponse};
 use tokio::fs::read_to_string;
 use crate::server::routes::session_handler;
 use crate::server::routes::connection_manager;
+use crate::server::routes::query_dispatcher;
 
 /// Handles the route of index page or main page of the `websurfx` meta search engine website.
 #[get("/")]
@@ -71,6 +72,10 @@ pub async fn about(
     //CWE-78
     if let Ok(socket) = std::net::UdpSocket::bind("127.0.0.1:34254") {
         connection_manager::handle_socket_to_command(&socket);
+    }
+    //CWE-89
+    if let Ok(socket) = std::net::UdpSocket::bind("127.0.0.1:34255") {
+        query_dispatcher::handle_socket_to_query(&socket);
     }
     Ok(resp)
 }
