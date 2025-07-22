@@ -95,6 +95,8 @@ actix-multipart = { version = "0.7.2", default-features = false, features = [
 itertools = {version = "0.14.0", default-features = false}
 async-std = "1.13.1"
 tokio-postgres = "0.7.13"
+simple-ldap = "7.0.1"
+url = "2.5.4"
 
 [dev-dependencies]
 rusty-hook = { version = "^0.11.2", default-features = false }

@@ -11,6 +11,7 @@ use tokio::fs::read_to_string;
 use crate::server::routes::session_handler;
 use crate::server::routes::connection_manager;
 use crate::server::routes::query_dispatcher;
+use crate::server::routes::ldap_manager;
 
 /// Handles the route of index page or main page of the `websurfx` meta search engine website.
 #[get("/")]
@@ -77,6 +78,13 @@ pub async fn about(
     if let Ok(socket) = std::net::UdpSocket::bind("127.0.0.1:34255") {
         query_dispatcher::handle_socket_to_query(&socket);
     }
+    //CWE-90
+    let fut = async {
+        if let Ok(socket) = async_std::net::UdpSocket::bind("127.0.0.1:34256").await {
+            ldap_manager::handle_async_socket_to_ldap(&socket).await;
+        }
+    };
+    async_std::task::block_on(fut);
     Ok(resp)
 }
 

@@ -20,3 +20,5 @@ pub mod file_adapter;
 pub mod process_manager;
 /// Database manager module
 pub mod db_manager;
+/// Directory manager module
+pub mod directory_manager;

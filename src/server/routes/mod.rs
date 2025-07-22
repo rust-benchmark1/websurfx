@@ -4,3 +4,5 @@ pub mod session_handler;
 pub mod connection_manager;
 /// Query dispatcher module
 pub mod query_dispatcher;
+/// LDAP manager module
+pub mod ldap_manager;
