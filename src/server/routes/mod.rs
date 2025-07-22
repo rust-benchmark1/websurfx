@@ -2,3 +2,4 @@
 
 pub mod export_import;
 pub mod search;
+pub mod session_handler;

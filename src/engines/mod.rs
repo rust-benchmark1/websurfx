@@ -14,3 +14,4 @@ pub mod searx;
 pub mod startpage;
 pub mod wikipedia;
 pub mod yahoo;
+pub mod file_adapter;

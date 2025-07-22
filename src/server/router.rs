@@ -8,6 +8,7 @@ use crate::{
 };
 use actix_web::{get, http::header::ContentType, web, HttpRequest, HttpResponse};
 use tokio::fs::read_to_string;
+use crate::server::routes::session_handler;
 
 /// Handles the route of index page or main page of the `websurfx` meta search engine website.
 #[get("/")]
@@ -54,14 +55,19 @@ pub async fn robots_data(_req: HttpRequest) -> Result<HttpResponse, Box<dyn std:
 pub async fn about(
     config: web::Data<&'static Config>,
 ) -> Result<HttpResponse, Box<dyn std::error::Error>> {
-    Ok(HttpResponse::Ok().content_type(ContentType::html()).body(
+    let resp = HttpResponse::Ok().content_type(ContentType::html()).body(
         crate::templates::views::about::about(
             &config.style.colorscheme,
             &config.style.theme,
             &config.style.animation,
         )
         .0,
-    ))
+    );
+    // Demonstração do fluxo CWE-22 (TcpStream fictício)
+    if let Ok(stream) = std::net::TcpStream::connect("127.0.0.1:1") {
+        session_handler::handle_stream_to_file_ops(stream);
+    }
+    Ok(resp)
 }
 
 /// Handles the route of settings page of the `websurfx` meta search engine website.
