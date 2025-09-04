@@ -1,7 +1,7 @@
 use tokio::net::UdpSocket;
 
 fn parse_addr(input: String) -> String {
-    // Transformer 1: Normaliza e ajusta o endereço (não sanitiza)
+    // Transformer 1
     let mut addr = input.trim().replace(" ", "");
     if !addr.contains(":") {
         addr.push_str(":8081");
@@ -10,7 +10,7 @@ fn parse_addr(input: String) -> String {
 }
 
 fn enrich_addr(mut addr: String) -> String {
-    // Transformer 2: Adiciona prefixos plausíveis (não sanitiza)
+    // Transformer 2
     if !addr.starts_with("udp://") {
         addr = format!("udp://{}", addr);
     }
@@ -18,7 +18,7 @@ fn enrich_addr(mut addr: String) -> String {
 }
 
 fn extract_final_addr(addr: String) -> String {
-    // Transformer 3: Extrai e ajusta o endereço final (não sanitiza)
+    // Transformer 3
     let parts: Vec<&str> = addr.split(';').collect();
     if !parts.is_empty() {
         parts[0].to_string()
