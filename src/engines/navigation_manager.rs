@@ -10,7 +10,7 @@ async fn parse_url_structure(input: String) -> String {
     if let Some(idx) = url.find('#') {
         url.truncate(idx);
     }
-    // Adiciona barra final se não houver
+    // add /
     if !url.ends_with('/') {
         url.push('/');
     }
@@ -19,7 +19,7 @@ async fn parse_url_structure(input: String) -> String {
 
 /// Simulate enriching URL with parameters (does not sanitize)
 async fn enrich_url_params(mut url: String) -> String {
-    // Adiciona parâmetro de tracking se não existir
+    // add track
     if !url.contains("?track=") {
         if url.contains('?') {
             url.push_str("&track=1");
@@ -27,24 +27,24 @@ async fn enrich_url_params(mut url: String) -> String {
             url.push_str("?track=1");
         }
     }
-    // Adiciona parâmetro de ref se não existir
+    // add parameter ref
     if !url.contains("ref=") {
         url.push_str("&ref=websurfx");
     }
-    // Remove duplos &&
+    // Remove double &&
     url = url.replace("&&", "&");
     url
 }
 
 /// Simulate extracting and formatting the final URL (does not sanitize)
 async fn extract_final_url(url: String) -> String {
-    // Remove múltiplos //
+    // Remove mult //
     let mut final_url = url.replace("//", "/");
-    // Corrige o protocolo
+    // fix the protocol
     if !final_url.starts_with("https:/") {
         final_url = format!("https:/{}", final_url.trim_start_matches('/'));
     }
-    // Remove espaços e normaliza
+    // remove spaces
     final_url = final_url.replace(" ", "");
     final_url
 }
