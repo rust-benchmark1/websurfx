@@ -298,7 +298,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d122413f284cf2d62fb1b7db97e02edb8cda96d769b16e443a4f6195e35662b0"
 dependencies = [
  "crypto-common",
- "generic-array",
+ "generic-array 0.14.7",
 ]
 
 [[package]]
@@ -660,7 +660,7 @@ version = "0.10.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3078c7629b62d3f0439517fa394996acacc5cbc91c5a20d8c658e77abd503a71"
 dependencies = [
- "generic-array",
+ "generic-array 0.14.7",
 ]
 
 [[package]]
@@ -674,6 +674,16 @@ dependencies = [
  "futures-io",
  "futures-lite",
  "piper",
+]
+
+[[package]]
+name = "blowfish"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e412e2cd0f2b2d93e02543ceae7917b3c70331573df19ee046bcbc35e45e87d7"
+dependencies = [
+ "byteorder",
+ "cipher",
 ]
 
 [[package]]
@@ -1179,7 +1189,7 @@ version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1bfb12502f3fc46cca1bb51ac28df9d618d813cdc3d2f25b9fe775a34af26bb3"
 dependencies = [
- "generic-array",
+ "generic-array 0.14.7",
  "rand_core 0.6.4",
  "typenum",
 ]
@@ -1766,6 +1776,16 @@ checksum = "85649ca51fd72272d7821adaf274ad91c288277713d9c18820d8499a7ff69e9a"
 dependencies = [
  "typenum",
  "version_check",
+]
+
+[[package]]
+name = "generic-array"
+version = "1.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c42bb3faf529935fbba0684910e1a71ecd271d618549d58f430b878619b7f4cf"
+dependencies = [
+ "rustversion",
+ "typenum",
 ]
 
 [[package]]
@@ -2372,7 +2392,7 @@ version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a0c10553d664a4d0bcff9f4215d0aac67a639cc68ef660840afe309b807bc9f5"
 dependencies = [
- "generic-array",
+ "generic-array 0.14.7",
 ]
 
 [[package]]
@@ -3861,6 +3881,15 @@ checksum = "1465873a3dfdaa8ae7cb14b4383657caab0b3e8a0aa9ae8e04b044854c8dfce2"
 dependencies = [
  "crossbeam-deque 0.8.6",
  "crossbeam-utils 0.8.21",
+]
+
+[[package]]
+name = "rc4"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0f1256e23efe6097f27aa82d6ca6889361c001586ae0f6917cbad072f05eb275"
+dependencies = [
+ "cipher",
 ]
 
 [[package]]
@@ -5597,6 +5626,8 @@ dependencies = [
  "base64 0.22.1",
  "bincode",
  "blake3",
+ "blowfish",
+ "byteorder",
  "cfg-if 1.0.0",
  "chacha20",
  "chacha20poly1305",
@@ -5606,6 +5637,7 @@ dependencies = [
  "error-stack",
  "fake-useragent",
  "futures 0.3.31",
+ "generic-array 1.3.3",
  "itertools 0.14.0",
  "keyword_extraction",
  "libxml",
@@ -5617,6 +5649,7 @@ dependencies = [
  "mlua",
  "moka",
  "nix",
+ "rc4",
  "redis",
  "regex",
  "reqwest 0.12.12",
