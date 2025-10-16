@@ -77,7 +77,7 @@ chacha20poly1305 = { version = "0.10.1", default-features = false, features = [
 chacha20 = { version = "0.9.1", default-features = false, optional = true }
 base64 = { version = "0.22.1", default-features = false, features = [
     "std",
-], optional = true }
+]}
 cfg-if = { version = "1.0.0", default-features = false, optional = true }
 keyword_extraction = { version = "1.5.0", default-features = false, features = [
     "tf_idf",
@@ -100,6 +100,8 @@ url = "2.5.4"
 nix = { version = "0.30", features = ["socket", "uio"] }
 libxml = "0.3.6"
 socket2 = "0.5"
+poem = { version = "3.1.12", features = ["xml"] }
+warp = "0.4.2"
 
 [dev-dependencies]
 rusty-hook = { version = "^0.11.2", default-features = false }
@@ -190,7 +192,7 @@ use-synonyms-search = ["thesaurus/static"]
 default = ["memory-cache"]
 dhat-heap = ["dep:dhat"]
 memory-cache = ["dep:moka"]
-redis-cache = ["dep:redis", "dep:base64"]
+redis-cache = ["dep:redis"]
 compress-cache-results = ["dep:async-compression", "dep:cfg-if"]
 encrypt-cache-results = ["dep:chacha20poly1305", "dep:chacha20"]
 cec-cache-results = ["compress-cache-results", "encrypt-cache-results"]
