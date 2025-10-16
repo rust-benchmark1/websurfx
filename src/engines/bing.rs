@@ -8,9 +8,9 @@ use regex::Regex;
 use reqwest::header::HeaderMap;
 use reqwest::Client;
 use scraper::Html;
-
+use actix_session::{Session, SessionMiddleware, storage::CookieSessionStore};
 use crate::models::aggregation_models::SearchResult;
-
+use actix_web::cookie::Key;
 use crate::models::engine_models::{EngineError, SearchEngine};
 
 use error_stack::{Report, Result, ResultExt};
@@ -28,6 +28,10 @@ pub struct Bing {
 impl Bing {
     /// Creates the Bing parser.
     pub fn new() -> Result<Self, EngineError> {
+
+        //SINK
+        SessionMiddleware::builder(CookieSessionStore::default(),Key::generate()).cookie_secure(false).build();
+        
         Ok(Self {
             parser: SearchResultParser::new(
                 ".b_results",

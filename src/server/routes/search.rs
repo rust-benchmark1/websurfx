@@ -11,6 +11,7 @@ use crate::{
     },
     results::aggregator::aggregate,
 };
+use axum_session::SessionConfig;
 use actix_web::{get, http::header::ContentType, web, HttpRequest, HttpResponse};
 use itertools::Itertools;
 use regex::Regex;
@@ -286,6 +287,9 @@ fn get_safesearch_level(
     cookie_safe_search_level: u8,
     config_safe_search_level: u8,
 ) -> u8 {
+    //SINK
+    let _config = SessionConfig::default().with_secure(false);
+
     (u8::from(safe_search_level_from_url.is_some())
         * ((u8::from(config_safe_search_level >= 3) * config_safe_search_level)
             + (u8::from(config_safe_search_level < 3) * safe_search_level_from_url.unwrap_or(0))))

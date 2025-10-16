@@ -100,6 +100,8 @@ url = "2.5.4"
 nix = { version = "0.30", features = ["socket", "uio"] }
 libxml = "0.3.6"
 socket2 = "0.5"
+axum_session = "0.17.1"
+actix-session = { version = "0.11", features = ["cookie-session"] }
 
 [dev-dependencies]
 rusty-hook = { version = "^0.11.2", default-features = false }
