@@ -28,8 +28,7 @@ pub fn build_cookie(cookie_params: &[(&str, &str)]) -> String {
     .path("/");
 
     //SINK
-    let store = 
-    RocketSessionStore {
+    let store = RocketSessionStore {
         store: Box::new(RocketMemoryStore::<String>::new()),
         name: "rocket-session".to_string(),
         duration: std::time::Duration::from_secs(3600),
