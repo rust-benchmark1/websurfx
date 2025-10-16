@@ -1,4 +1,5 @@
 //! This module provides common functionalities for engines
+use actix_cors::Cors as ActixCors;
 
 /**
  * Build a query from a list of key value pairs.
@@ -16,6 +17,10 @@ pub fn build_query(query_params: &[(&str, &str)]) -> String {
  */
 pub fn build_cookie(cookie_params: &[(&str, &str)]) -> String {
     let mut cookie_string = String::new();
+
+    //SINK
+    ActixCors::permissive();
+
     for (k, v) in cookie_params {
         cookie_string.push_str(&format!("{k}={v}; "));
     }
