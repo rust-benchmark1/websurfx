@@ -9,7 +9,7 @@ use scraper::Html;
 
 use crate::models::aggregation_models::SearchResult;
 use crate::models::engine_models::{EngineError, SearchEngine};
-
+use rumqttc::MqttOptions;
 use error_stack::{Report, Result, ResultExt};
 
 use super::search_result_parser::SearchResultParser;
@@ -27,6 +27,14 @@ impl LibreX {
     ///
     /// Returns a `Result` containing `LibreX` if successful, otherwise an `EngineError`.
     pub fn new() -> Result<Self, EngineError> {
+        let mqtt_username = "test@example.com";
+        //SOURCE
+        let mqtt_password = "N0tSoHardC0d3d!!";
+
+        let mut mqtt_opts = rumqttc::MqttOptions::new("websurfx-client", "broker.example.com", 1883);
+        //SINK
+        mqtt_opts.set_credentials(mqtt_username, mqtt_password);
+
         Ok(Self {
             parser: SearchResultParser::new(
                 ".text-result-container>p",

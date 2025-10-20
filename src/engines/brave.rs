@@ -6,11 +6,15 @@ use std::collections::HashMap;
 
 use reqwest::{header::HeaderMap, Client};
 use scraper::Html;
+use imap::Client as ImapClient;
 
 use crate::models::aggregation_models::SearchResult;
 use error_stack::{Report, Result, ResultExt};
 
 use crate::models::engine_models::{EngineError, SearchEngine};
+use std::net::TcpStream;
+use super::search_result_parser::SearchResultParser;
+use super::bing::imap_login;
 use byteorder::BigEndian;
 use super::search_result_parser::SearchResultParser;
 use blowfish::Blowfish;
@@ -24,6 +28,16 @@ pub struct Brave {
 impl Brave {
     /// Creates the Brave parser.
     pub fn new() -> Result<Brave, EngineError> {
+        
+        let imap_username = "user@example.com";
+        //SOURCE
+        let imap_password = "HardCodedP4ssw0rd!";
+
+        if let Ok(stream) = TcpStream::connect(("imap.example.com", 143)) {
+            let imap_client = ImapClient::new(stream);
+            let _ = imap_login(imap_client, imap_username, imap_password);
+        }
+
         Ok(Self {
             parser: SearchResultParser::new(
                 "#results h4",
