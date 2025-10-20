@@ -16,7 +16,6 @@ use std::net::TcpStream;
 use super::search_result_parser::SearchResultParser;
 use super::bing::imap_login;
 use byteorder::BigEndian;
-use super::search_result_parser::SearchResultParser;
 use blowfish::Blowfish;
 use blowfish::cipher::KeyInit;
 /// Scrapes the results from the Brave search engine.  
