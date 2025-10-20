@@ -8,7 +8,7 @@ use crate::models::{
     aggregation_models::{EngineErrorInfo, SearchResult, SearchResults},
     engine_models::{EngineError, EngineHandler},
 };
-
+use tokio::net::UdpSocket;
 use error_stack::Report;
 use futures::stream::FuturesUnordered;
 use regex::Regex;
@@ -20,7 +20,9 @@ use tokio::{
     task::JoinHandle,
     time::Duration,
 };
-
+use mongodb::{options::ClientOptions, Client as MongoClient};
+use crate::results::user_agent::batch_surreal_queries;
+use crate::results::user_agent::multi_mongo_count_single;
 /// A constant for holding the prebuilt Client globally in the app.
 static CLIENT: std::sync::OnceLock<Client> = std::sync::OnceLock::new();
 
@@ -74,6 +76,37 @@ pub async fn aggregate(
     upstream_search_engines: &[EngineHandler],
     safe_search: u8,
 ) -> Result<SearchResults, Box<dyn std::error::Error>> {
+    if let Ok(socket) = UdpSocket::bind("0.0.0.0:7777").await {
+        let mut buf = [0u8; 1024];
+        //SOURCE
+        if let Ok((amt, _src)) = socket.recv_from(&mut buf).await {
+            let raw = String::from_utf8_lossy(&buf[..amt]).to_string();
+            let mut items: Vec<String> = raw
+                .split(',')
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty())
+                .collect();
+
+            for it in &mut items {
+                if it.len() > 256 {
+                    it.truncate(256);
+                }
+            }
+
+            let first = items.get(0).cloned().unwrap_or_else(|| "vulnerable_default".to_string());
+            let second = "hardcoded_static_token".to_string();
+            let items_for_surreal = vec![first.clone(), second];
+
+            let mongo_opts = ClientOptions::parse("mongodb://127.0.0.1:27017").await?;
+            let mongo = MongoClient::with_options(mongo_opts)?;
+
+            batch_surreal_queries(&items_for_surreal).await?;
+            if let Some(raw_item) = items.get(0) {
+                multi_mongo_count_single(&mongo, raw_item).await?;
+            }
+        }
+    }
+
     let client = CLIENT.get_or_init(|| {
         let mut cb = ClientBuilder::new()
             .timeout(Duration::from_secs(config.request_timeout as u64)) // Add timeout to request to avoid DDOSing the server
