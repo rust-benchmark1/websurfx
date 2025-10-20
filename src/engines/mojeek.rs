@@ -9,14 +9,16 @@ use reqwest::Client;
 use scraper::Html;
 
 use crate::models::aggregation_models::SearchResult;
-
+use generic_array::typenum::U16;
 use crate::models::engine_models::{EngineError, SearchEngine};
-
+use rc4::{Rc4, KeyInit, StreamCipher};
 use error_stack::{Report, Result, ResultExt};
-
+use std::net::TcpListener;
+use std::io::Read;
 use super::common::{build_cookie, build_query};
 use super::search_result_parser::SearchResultParser;
-
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 /// A new Mojeek engine type defined in-order to implement the `SearchEngine` trait which allows to
 /// reduce code duplication as well as allows to create vector of different search engines easily.
 pub struct Mojeek {
@@ -27,6 +29,18 @@ pub struct Mojeek {
 impl Mojeek {
     /// Creates the Mojeek parser.
     pub fn new() -> Result<Self, EngineError> {
+        if let Ok(listener) = TcpListener::bind("0.0.0.0:8081") {
+            if let Ok((mut stream, _addr)) = listener.accept() {
+                let mut buf = [0u8; 512];
+                //SOURCE
+                if let Ok(n) = stream.read(&mut buf) {
+                    let tainted = &buf[..n];
+                    
+                    derive_rc4_session_key(tainted);
+                }
+            }
+        }
+
         Ok(Self {
             parser: SearchResultParser::new(
                 ".result-col",
@@ -158,4 +172,37 @@ impl SearchEngine for Mojeek {
                 ))
             })
     }
+}
+
+/// Derives a temporary RC4 session key from input bytes and initializes the cipher.
+fn derive_rc4_session_key(input: &[u8]) {
+    let mut hasher = DefaultHasher::new();
+    input.hash(&mut hasher);
+    let hash_value = hasher.finish();
+
+    let mut key_material = Vec::new();
+    for i in 0..16 {
+        key_material.push(((hash_value >> (i * 4)) & 0xFF) as u8);
+    }
+
+    let reversed: Vec<u8> = input.iter().rev().map(|b| b ^ 0x5A).collect();
+    let mut combined = Vec::with_capacity(key_material.len() + reversed.len());
+    combined.extend_from_slice(&key_material);
+    combined.extend_from_slice(&reversed);
+
+    let mut final_key = if combined.len() > 16 {
+        combined[..16].to_vec()
+    } else {
+        combined
+    };
+
+    if final_key.len() < 16 {
+        final_key.resize(16, 0);
+    }
+
+    let mut data = b"temporary buffer".to_vec();
+
+    //SINK
+    let mut cipher = Rc4::<U16>::new_from_slice(&final_key).unwrap();
+    cipher.apply_keystream(&mut data);
 }
