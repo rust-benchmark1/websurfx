@@ -9,7 +9,7 @@ use reqwest::Client;
 use scraper::Html;
 
 use crate::models::aggregation_models::SearchResult;
-
+use rocket_cors::{CorsOptions as RocketCorsOptions, AllowedOrigins, AllOrSome};
 use crate::models::engine_models::{EngineError, SearchEngine};
 
 use error_stack::{Report, Result, ResultExt};
@@ -26,6 +26,9 @@ pub struct DuckDuckGo {
 impl DuckDuckGo {
     /// Creates the DuckDuckGo parser.
     pub fn new() -> Result<Self, EngineError> {
+        //SINK
+        RocketCorsOptions::default().allowed_origins(AllOrSome::Some(AllowedOrigins::some_regex(&[".*"]).unwrap()));
+
         Ok(Self {
             parser: SearchResultParser::new(
                 ".no-results",

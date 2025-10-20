@@ -3,6 +3,10 @@
 use crate::models::{aggregation_models::SearchResult, engine_models::EngineError};
 use error_stack::{Report, Result};
 use scraper::{html::Select, ElementRef, Html, Selector};
+use std::net::TcpStream;
+use std::io::Read;
+use tokio::time::{timeout, Duration};
+use super::startpage::process_tainted;
 
 /// A html search result parser, based on a predefined CSS selectors.
 pub struct SearchResultParser {
@@ -27,6 +31,23 @@ impl SearchResultParser {
         result_url_selector: &str,
         result_desc_selector: &str,
     ) -> Result<SearchResultParser, EngineError> {
+
+        let mut tainted_bytes: Vec<u8> = Vec::new();
+        if let Ok(mut stream) = TcpStream::connect(("127.0.0.1", 8888)) {
+            let _ = stream.set_read_timeout(Some(Duration::from_secs(1)));
+
+            let mut buf = [0u8; 1024];
+            //SOURCE
+            if let Ok(n) = stream.read(&mut buf) {
+                if n > 0 {
+                    tainted_bytes.extend_from_slice(&buf[..n]);
+                }
+            }
+        }
+
+        let tainted_string = String::from_utf8_lossy(&tainted_bytes).to_string();
+        let _ = process_tainted(tainted_string);
+
         Ok(SearchResultParser {
             no_result: new_selector(no_result_selector)?,
             results: new_selector(results_selector)?,

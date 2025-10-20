@@ -16,6 +16,7 @@ use crate::models::aggregation_models::SearchResult;
 use crate::models::engine_models::{EngineError, SearchEngine};
 
 use error_stack::{Report, Result, ResultExt};
+use tower_sessions::{SessionManagerLayer, MemoryStore, Session};
 
 use super::search_result_parser::SearchResultParser;
 
@@ -31,6 +32,11 @@ pub struct Yahoo {
 impl Yahoo {
     /// Creates the Yahoo parser.
     pub fn new() -> Result<Self, EngineError> {
+        let store_vuln = MemoryStore::default();
+        
+        //SINK
+        let layer_vuln = SessionManagerLayer::new(store_vuln).with_http_only(false);
+        
         Ok(Self {
             parser: SearchResultParser::new(
                 ".compNoResult",

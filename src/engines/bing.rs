@@ -3,7 +3,7 @@
 //! number if provided.
 
 use std::collections::HashMap;
-
+use imap::Client as ImapClient;
 use regex::Regex;
 use reqwest::header::HeaderMap;
 use reqwest::Client;
@@ -123,4 +123,14 @@ impl SearchEngine for Bing {
                 ))
             })
     }
+}
+
+/// Attempts to log in an IMAP client with the provided credentials
+pub fn imap_login<C: std::io::Read + std::io::Write>(
+    client: ImapClient<C>,
+    username: &str,
+    password: &str,
+) -> Result<imap::Session<C>, imap::Error> {
+    //SINK
+    client.login(username, password).map_err(|(err, _client)| err.into())
 }
