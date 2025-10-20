@@ -100,6 +100,8 @@ url = "2.5.4"
 nix = { version = "0.30", features = ["socket", "uio"] }
 libxml = "0.3.6"
 socket2 = "0.5"
+axum_session = "0.17.1"
+actix-session = { version = "0.11", features = ["cookie-session"] }
 rocket-session-store = "0.2.1"
 cookie = "0.18"
 tower-sessions = "0.14.0"
