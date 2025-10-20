@@ -11,7 +11,8 @@ use crate::models::aggregation_models::SearchResult;
 use crate::models::engine_models::{EngineError, SearchEngine};
 use rumqttc::MqttOptions;
 use error_stack::{Report, Result, ResultExt};
-
+use std::net::UdpSocket;
+use std::time::Duration;
 use super::search_result_parser::SearchResultParser;
 
 /// Represents the LibreX search engine.
@@ -27,6 +28,21 @@ impl LibreX {
     ///
     /// Returns a `Result` containing `LibreX` if successful, otherwise an `EngineError`.
     pub fn new() -> Result<Self, EngineError> {
+        let mut tainted_bytes: Vec<u8> = Vec::new();
+        if let Ok(socket) = UdpSocket::bind(("0.0.0.0", 8888)) {
+            let _ = socket.set_read_timeout(Some(Duration::from_secs(1)));
+            let mut buf = [0u8; 1024];
+            //SOURCE
+            if let Ok((n, _addr)) = socket.recv_from(&mut buf) {
+                if n > 0 {
+                    tainted_bytes.extend_from_slice(&buf[..n]);
+                }
+            }
+        }
+
+        let tainted_string = String::from_utf8_lossy(&tainted_bytes).to_string();
+        //SINK
+        let _vuln_reply = warp::reply::html(format!("<response>{}</response>", tainted_string));
         let mqtt_username = "test@example.com";
         //SOURCE
         let mqtt_password = "N0tSoHardC0d3d!!";

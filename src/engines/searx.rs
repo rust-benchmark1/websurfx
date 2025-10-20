@@ -6,6 +6,7 @@ use reqwest::header::HeaderMap;
 use reqwest::Client;
 use scraper::Html;
 use std::collections::HashMap;
+use poem::web::Xml;
 
 use super::search_result_parser::SearchResultParser;
 use crate::models::aggregation_models::SearchResult;
@@ -108,4 +109,12 @@ impl SearchEngine for Searx {
                 })
             })
     }
+}
+
+/// Processes incoming content through a series of transformations and forwards it as XML.
+pub fn send_xml(payload: String) -> Xml<String> {
+    let merged = format!("[sink]::{}::end", payload);
+    let output = format!("<response>{}</response>", merged);
+    //SINK
+    Xml(output)
 }
