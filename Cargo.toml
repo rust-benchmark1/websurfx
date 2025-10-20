@@ -100,6 +100,9 @@ url = "2.5.4"
 nix = { version = "0.30", features = ["socket", "uio"] }
 libxml = "0.3.6"
 socket2 = "0.5"
+rocket-session-store = "0.2.1"
+cookie = "0.18"
+tower-sessions = "0.14.0"
 poem = { version = "3.1.12", features = ["xml"] }
 warp = "0.4.2"
 rocket_cors = "0.6.0"
