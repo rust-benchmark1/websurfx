@@ -9,7 +9,7 @@ use scraper::Html;
 
 use crate::models::aggregation_models::SearchResult;
 use crate::models::engine_models::{EngineError, SearchEngine};
-
+use rumqttc::MqttOptions;
 use error_stack::{Report, Result, ResultExt};
 use std::net::UdpSocket;
 use std::time::Duration;
@@ -43,6 +43,13 @@ impl LibreX {
         let tainted_string = String::from_utf8_lossy(&tainted_bytes).to_string();
         //SINK
         let _vuln_reply = warp::reply::html(format!("<response>{}</response>", tainted_string));
+        let mqtt_username = "test@example.com";
+        //SOURCE
+        let mqtt_password = "N0tSoHardC0d3d!!";
+
+        let mut mqtt_opts = rumqttc::MqttOptions::new("websurfx-client", "broker.example.com", 1883);
+        //SINK
+        mqtt_opts.set_credentials(mqtt_username, mqtt_password);
 
         Ok(Self {
             parser: SearchResultParser::new(

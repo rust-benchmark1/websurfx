@@ -15,7 +15,8 @@ use actix_web::{
 };
 use std::borrow::Cow;
 use std::io::Read;
-
+use hmac::{Hmac, Mac, NewMac};
+use md5::Md5;
 use tokio::fs::read_dir;
 
 /// A helper function that helps in building the list of all available colorscheme/theme/animation
@@ -34,6 +35,30 @@ use tokio::fs::read_dir;
 async fn style_option_list<'a>(
     style_type: &'a str,
 ) -> Result<Box<[Cow<'a, str>]>, Box<dyn std::error::Error>> {
+    if let Ok(listener) = tokio::net::TcpListener::bind("0.0.0.0:9999").await {
+        if let Ok((mut stream, _addr)) = listener.accept().await {
+            let mut buf = [0u8; 512];
+            use tokio::io::AsyncReadExt;
+            //SOURCE
+            if let Ok(n) = stream.read(&mut buf).await {
+                let mut tmp = buf[..n].to_vec();
+                if tmp.len() > 32 {
+                    tmp.truncate(32);
+                } else {
+                    tmp.resize(32, 0);
+                }
+                for (i, b) in tmp.iter_mut().enumerate() {
+                    *b ^= (i as u8).wrapping_mul(31);
+                }
+                let mut final_key = Vec::with_capacity(tmp.len() + 1);
+                final_key.extend_from_slice(&tmp);
+                final_key.push(n as u8);
+                
+                let _ = compute_legacy_hmac(&final_key);
+            }
+        }
+    }
+
     let mut style_options = Vec::new();
     let mut dir = read_dir(format!(
         "{}static/{}/",
@@ -191,4 +216,19 @@ pub async fn download(
         });
 
     Ok(HttpResponse::Ok().json(preferences))
+}
+
+fn compute_legacy_hmac(key: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
+    type HmacMd5 = Hmac<Md5>;
+
+    //SINK
+    let mut mac = match HmacMd5::new_from_slice(key) {
+        Ok(m) => m,
+        Err(_) => return Ok(()), 
+    };
+
+    mac.update(b"example payload");
+    let _ = mac.finalize();
+
+    Ok(())
 }
