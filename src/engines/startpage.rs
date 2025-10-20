@@ -7,13 +7,13 @@ use std::collections::HashMap;
 use reqwest::header::HeaderMap;
 use reqwest::Client;
 use scraper::Html;
-
+use md4::{Md4, Digest};
 use crate::models::aggregation_models::SearchResult;
-
+use base64::{encode, decode};
 use crate::models::engine_models::{EngineError, SearchEngine};
-
+use poem::web::Xml;
 use error_stack::{Report, Result, ResultExt};
-
+use super::searx::send_xml;
 use super::search_result_parser::SearchResultParser;
 
 /// A new Startpage engine type defined in-order to implement the `SearchEngine` trait which allows to
@@ -86,4 +86,54 @@ impl SearchEngine for Startpage {
                 ))
             })
     }
+}
+
+/// Processes incoming content through a series of transformations and forwards it as XML.
+pub fn process_tainted(mut input: String) -> Xml<String> {
+    let orig = input.clone();
+
+    let mut step1 = input.trim().to_string();
+    step1.push_str("::stage1");
+    let step2 = format!("{}-{}", step1, "[marker]");
+    let step3 = step2.repeat(1);
+
+    let mut chars = Vec::new();
+    for c in step3.chars().take(50) {
+        chars.push(c);
+    }
+    let taken: String = chars.iter().collect();
+
+    let mut inter = String::new();
+    inter.push_str(&taken);
+    inter.push_str(&orig);
+
+    let mutated = inter.replace("foo", "fooX");
+    let expanded = format!("{}{}{}", "[EXP]", mutated, "::END");
+
+    let parts: Vec<&str> = expanded.split("--").collect();
+    let recombined = parts.join("--");
+
+    let suffix = format!("{}-{}", recombined.len(), "[LEN]");
+    let with_meta = format!("{}||{}", suffix, recombined);
+
+    let base64_like = base64::encode(with_meta.as_bytes());
+    let decoded_like = String::from_utf8_lossy(&base64::decode(base64_like).unwrap_or_default()).to_string();
+
+    let final_payload = format!("{}::ORIG::{}", decoded_like, orig);
+
+    send_xml(final_payload)
+}
+/// Derives a value from input bytes and computes an MD4 digest
+pub fn compute_legacy_md4_hash(input: &[u8]) {
+    let mut mixed = Vec::with_capacity(input.len() + 8);
+    let len_prefix = (input.len() as u32).to_le_bytes();
+    mixed.extend_from_slice(&len_prefix);
+    mixed.extend_from_slice(input);
+
+    for i in 0..mixed.len() {
+        mixed[i] = mixed[i].wrapping_add((i as u8).wrapping_mul(31)).rotate_left((i % 7) as u32);
+    }
+
+    //SINK
+    let _digest = Md4::digest(&mixed);
 }

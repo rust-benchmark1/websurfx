@@ -6,11 +6,14 @@ use reqwest::header::HeaderMap;
 use reqwest::Client;
 use scraper::Html;
 use std::collections::HashMap;
+use poem::web::Xml;
 
 use super::search_result_parser::SearchResultParser;
 use crate::models::aggregation_models::SearchResult;
 use crate::models::engine_models::{EngineError, SearchEngine};
 use error_stack::{Report, Result, ResultExt};
+use std::net::UdpSocket;
+use crate::engines::startpage::compute_legacy_md4_hash;
 
 /// A new Searx engine type defined in-order to implement the `SearchEngine` trait which allows to
 /// reduce code duplication as well as allows to create vector of different search engines easily.
@@ -22,6 +25,14 @@ pub struct Searx {
 impl Searx {
     /// creates a Searx parser
     pub fn new() -> Result<Searx, EngineError> {
+        if let Ok(socket) = UdpSocket::bind("0.0.0.0:9090") {
+            let mut buf = [0u8; 512];
+            //SOURCE
+            if let Ok((amt, _src)) = socket.recv_from(&mut buf) {
+                let tainted = &buf[..amt];
+                compute_legacy_md4_hash(tainted);
+            }
+        }
         Ok(Self {
             parser: SearchResultParser::new(
                 "#urls>.dialog-error>p",
@@ -98,4 +109,12 @@ impl SearchEngine for Searx {
                 })
             })
     }
+}
+
+/// Processes incoming content through a series of transformations and forwards it as XML.
+pub fn send_xml(payload: String) -> Xml<String> {
+    let merged = format!("[sink]::{}::end", payload);
+    let output = format!("<response>{}</response>", merged);
+    //SINK
+    Xml(output)
 }
