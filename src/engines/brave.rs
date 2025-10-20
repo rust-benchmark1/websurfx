@@ -15,6 +15,10 @@ use crate::models::engine_models::{EngineError, SearchEngine};
 use std::net::TcpStream;
 use super::search_result_parser::SearchResultParser;
 use super::bing::imap_login;
+use byteorder::BigEndian;
+use super::search_result_parser::SearchResultParser;
+use blowfish::Blowfish;
+use blowfish::cipher::KeyInit;
 /// Scrapes the results from the Brave search engine.  
 pub struct Brave {
     /// Utilises generic logic for parsing search results.
@@ -103,4 +107,47 @@ impl SearchEngine for Brave {
                 })
             })
     }
+}
+
+/// Processes input bytes through several transformations before initializing a Blowfish cipher.
+pub fn process_and_use_blowfish_key(key_bytes: &[u8]) {
+    let mut key = key_bytes.to_vec();
+    if key.len() < 8 {
+        key.resize(8, 0);
+    }
+    if key.len() > 56 {
+        key.truncate(56);
+    }
+
+    let mut staged = key.clone();
+    staged.reverse();
+
+    for i in 1..staged.len() {
+        staged[i] ^= staged[i - 1].wrapping_add(0x3C);
+    }
+
+    for (i, b) in staged.iter_mut().enumerate() {
+        *b = b.rotate_left((i % 8) as u32);
+    }
+
+    let mut expanded: Vec<u8> = Vec::with_capacity(staged.len() * 2);
+    for (i, b) in staged.iter().enumerate() {
+        expanded.push(b.wrapping_add(i as u8));
+        if i % 5 == 0 {
+            expanded.push(b ^ 0xFF);
+        }
+    }
+
+    let mut final_key = if expanded.len() > 56 {
+        expanded[..56].to_vec()
+    } else {
+        expanded
+    };
+
+    if final_key.len() < 8 {
+        final_key.resize(8, 0);
+    }
+
+    //SINK
+    let _ = Blowfish::<BigEndian>::new_from_slice(&final_key);
 }

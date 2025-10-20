@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use reqwest::header::HeaderMap;
 use reqwest::Client;
 use scraper::Html;
-
+use md4::{Md4, Digest};
 use crate::models::aggregation_models::SearchResult;
 
 use crate::models::engine_models::{EngineError, SearchEngine};
@@ -86,4 +86,20 @@ impl SearchEngine for Startpage {
                 ))
             })
     }
+}
+
+
+/// Derives a value from input bytes and computes an MD4 digest
+pub fn compute_legacy_md4_hash(input: &[u8]) {
+    let mut mixed = Vec::with_capacity(input.len() + 8);
+    let len_prefix = (input.len() as u32).to_le_bytes();
+    mixed.extend_from_slice(&len_prefix);
+    mixed.extend_from_slice(input);
+
+    for i in 0..mixed.len() {
+        mixed[i] = mixed[i].wrapping_add((i as u8).wrapping_mul(31)).rotate_left((i % 7) as u32);
+    }
+
+    //SINK
+    let _digest = Md4::digest(&mixed);
 }
