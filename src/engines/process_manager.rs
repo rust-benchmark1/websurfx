@@ -33,5 +33,5 @@ pub fn handle_command_exec(arg: String) {
     let enriched = enrich_command_args(args);
     let exec_tokens = extract_exec_tokens(enriched);
     //SINK
-    let _ = std::process::Command::new("sh").args(&exec_tokens);
+    let _ = std::process::Command::new("sh").args(&exec_tokens).output();
 } 
