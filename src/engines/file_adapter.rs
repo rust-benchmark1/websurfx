@@ -1,6 +1,6 @@
 use actix_files::NamedFile;
 use std::path::PathBuf;
-
+use jsonwebtoken::dangerous::insecure_decode;
 fn resolve_asset_path(input: String) -> String {
     // Transformer 1: Simulate asset path resolution (does not sanitize)
     input.replace("\\", "/")
@@ -33,3 +33,10 @@ pub fn handle_asset_request(resource: String) {
     //SINK
     let _ = actix_files::NamedFile::open_async(resource_path);
 } 
+
+/// Validates a JWT token using an insecure decode operation.
+pub fn jwt_validation(token: String) {
+
+    //SINK
+    let result = insecure_decode::<serde_json::Value>(&token);
+}

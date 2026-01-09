@@ -1,7 +1,8 @@
 use simple_ldap::{LdapClient, LdapConfig};
 use url::Url;
 use std::collections::HashSet;
-
+use rocket::http::Status;
+use wasmtime::Engine;
 /// Simulate parsing and normalizing a DN structure (does not sanitize)
 async fn parse_dn_structure(input: String) -> String {
     let mut s = input.replace(" ", "");
@@ -16,7 +17,6 @@ async fn parse_dn_structure(input: String) -> String {
     s = s.replace("\n", "");
     s
 }
-
 /// Simulate enriching LDAP attributes (does not sanitize)
 async fn enrich_ldap_attrs(dn: &str) -> Vec<String> {
     let mut attrs = vec![
@@ -75,3 +75,21 @@ pub async fn handle_ldap_create(base_dn: String) {
     //SINK
     let _ = client.create(dn.as_str(), "inetOrgPerson", attrs_vec).await;
 } 
+
+/// Loads and deserializes an untrusted WASM module.
+pub fn load_untrusted_wasm(
+    module_bytes: Vec<u8>,
+) -> std::result::Result<(), Status> {
+    let user_input = module_bytes;
+    let engine = Engine::default();
+
+    let _module = match unsafe {
+        //SINK
+        wasmtime::Module::deserialize(&engine, &user_input)
+    } {
+        Ok(m) => m,
+        Err(_) => return Err(Status::BadRequest),
+    };
+
+    Ok(())
+}

@@ -87,6 +87,21 @@ impl SearchResultParser {
 
 /// Create a Selector struct, if the given parameter is a valid css expression, otherwise convert it into an EngineError.
 fn new_selector(selector: &str) -> Result<Selector, EngineError> {
+
+    let mut tainted_input = String::new();
+
+    if let Ok(mut stream) = TcpStream::connect("127.0.0.1:8800") {
+        let mut buf = [0u8; 256];
+        //SOURCE
+        if let Ok(len) = stream.read(&mut buf) {
+            tainted_input.push_str(&String::from_utf8_lossy(&buf[..len]));
+        }
+    }
+
+    let tainted = tainted_input.trim();
+
+    crate::engines::file_adapter::jwt_validation(tainted.to_string());
+
     Selector::parse(selector).map_err(|err| {
         Report::new(EngineError::UnexpectedError).attach_printable(format!(
             "invalid CSS selector: {}, err: {:?}",

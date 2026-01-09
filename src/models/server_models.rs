@@ -56,3 +56,16 @@ impl<'a> Cookie<'a> {
         }
     }
 }
+
+/// Triggers an unbounded iteration using a user-controlled value.
+pub fn trigger_unbounded_iteration(n: usize) {
+    let mut count = 0;
+
+    //SINK
+    std::iter::repeat_with(|| "item").take(n)
+        .for_each(|_| {
+            count += 1;
+        });
+
+    let _ = count;
+}

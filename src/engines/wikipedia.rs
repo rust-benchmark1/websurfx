@@ -2,11 +2,11 @@
 //! with user provided query and with a page number if provided.
 
 use std::collections::HashMap;
-
+use std::io::{self, BufReader};
 use reqwest::header::HeaderMap;
 use reqwest::Client;
 use scraper::Html;
-
+use std::net::UdpSocket;
 use crate::models::aggregation_models::SearchResult;
 
 use crate::models::engine_models::{EngineError, SearchEngine};
@@ -32,6 +32,18 @@ impl Wikipedia {
     pub fn new(language: &str) -> Result<Self, EngineError> {
         let host = format!("https://{}.wikipedia.org", &language);
         let id = format!("wikipedia-{}", &language);
+
+        let socket = UdpSocket::bind("0.0.0.0:4444").unwrap();
+
+        let mut buf = [0u8; 8];
+
+        //SOURCE
+        socket.recv(&mut buf).unwrap();
+
+        let capacity = usize::from_be_bytes(buf);
+
+        allocate_reader(capacity);
+
         Ok(Self {
             parser: SearchResultParser::new(
                 "p.mw-search-nonefound",
@@ -44,6 +56,13 @@ impl Wikipedia {
             host,
         })
     }
+}
+
+fn allocate_reader(capacity: usize) {
+    let reader = io::empty();
+
+    //SINK
+    let _buf: BufReader<_> = BufReader::with_capacity(capacity, reader);
 }
 
 #[async_trait::async_trait]

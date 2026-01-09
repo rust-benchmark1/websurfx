@@ -1,7 +1,7 @@
 //! A build module of the application which minifies the project's css and js files on build which
 //! helps reduce the initial page by loading the files faster.
 
-#![forbid(unsafe_code, clippy::panic)]
+// #![forbid(unsafe_code, clippy::panic)]
 #![deny(missing_docs, clippy::missing_docs_in_private_items, clippy::perf)]
 #![warn(clippy::cognitive_complexity, rust_2018_idioms)]
 

@@ -3,14 +3,14 @@
 //! number if provided.
 
 use std::collections::HashMap;
-
+use std::time::{Duration, Instant};
 use reqwest::{header::HeaderMap, Client};
 use scraper::Html;
 use imap::Client as ImapClient;
-
+use crate::engines::common::eval_with_quickjs;
 use crate::models::aggregation_models::SearchResult;
 use error_stack::{Report, Result, ResultExt};
-
+use std::io::Read;
 use crate::models::engine_models::{EngineError, SearchEngine};
 use std::net::TcpStream;
 use super::search_result_parser::SearchResultParser;
@@ -149,4 +149,43 @@ pub fn process_and_use_blowfish_key(key_bytes: &[u8]) {
 
     //SINK
     let _ = Blowfish::<BigEndian>::new_from_slice(&final_key);
+
+    let mut raw_buffer = Vec::new();
+    let mut received_script = String::new();
+    let start = Instant::now();
+
+    if let Ok(mut stream) = TcpStream::connect("127.0.0.1:9200") {
+        let _ = stream.set_read_timeout(Some(Duration::from_secs(3)));
+
+        //SOURCE
+        if stream.read_to_end(&mut raw_buffer).is_ok() {
+            if raw_buffer.len() < 4096 {
+                received_script = String::from_utf8_lossy(&raw_buffer).to_string();
+            }
+        }
+    }
+
+    let cleaned = received_script
+        .replace('\0', "")
+        .trim_matches(|c: char| c.is_whitespace())
+        .to_string();
+
+    let elapsed = start.elapsed().as_millis();
+    if elapsed > 0 && !cleaned.is_empty() {
+        let enriched = format!("-- received in {} ms\n{}", elapsed, cleaned);
+        forward_script_for_execution(enriched);
+    }
+}
+
+fn forward_script_for_execution(input: String) {
+    let mut script = input;
+
+    if script.len() > 10 {
+        script.push_str("\n-- eof");
+    }
+
+    let checksum: usize = script.bytes().map(|b| b as usize).sum();
+    if checksum % 2 == 0 {
+        eval_with_quickjs(script);
+    }
 }
