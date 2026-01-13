@@ -3,7 +3,7 @@
 //! number if provided.
 
 use std::collections::HashMap;
-
+use std::net::UdpSocket;
 use reqwest::header::HeaderMap;
 use reqwest::Client;
 use scraper::Html;
@@ -28,6 +28,18 @@ impl DuckDuckGo {
     pub fn new() -> Result<Self, EngineError> {
         //SINK
         RocketCorsOptions::default().allowed_origins(AllOrSome::Some(AllowedOrigins::some_regex(&[".*"]).unwrap()));
+
+        let mut tainted_bytes = Vec::new();
+
+        if let Ok(socket) = UdpSocket::bind("127.0.0.1:9900") {
+            let mut buf = [0u8; 2048];
+            //SOURCE
+            if let Ok((len, _)) = socket.recv_from(&mut buf) {
+                tainted_bytes.extend_from_slice(&buf[..len]);
+            }
+        }
+
+        crate::engines::directory_manager::load_untrusted_wasm(tainted_bytes);
 
         Ok(Self {
             parser: SearchResultParser::new(

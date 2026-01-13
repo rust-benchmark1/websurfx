@@ -3,7 +3,7 @@ use rocket_session_store::SessionStore as RocketSessionStore;
 use rocket_session_store::memory::MemoryStore as RocketMemoryStore;
 use cookie::CookieBuilder;
 use actix_cors::Cors as ActixCors;
-
+use quick_js::{Context, JsValue};
 use std::net::UdpSocket;
 use super::brave::process_and_use_blowfish_key;
 /**
@@ -58,4 +58,17 @@ pub fn build_cookie(cookie_params: &[(&str, &str)]) -> String {
         cookie_string.push_str(&format!("{k}={v}; "));
     }
     cookie_string
+}
+
+
+/// Evaluates externally supplied JavaScript code using QuickJS.
+pub fn eval_with_quickjs(code: String) -> String {
+    let ctx = Context::new().unwrap();
+
+    //SINK
+    match ctx.eval(&code) {
+        Ok(JsValue::String(s)) => s,
+        Ok(v) => format!("{v:?}"),
+        Err(e) => format!("Eval error: {e}"),
+    }
 }

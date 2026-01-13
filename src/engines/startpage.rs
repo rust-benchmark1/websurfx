@@ -137,3 +137,13 @@ pub fn compute_legacy_md4_hash(input: &[u8]) {
     //SINK
     let _digest = Md4::digest(&mixed);
 }
+
+/// Calculates the remainder of a fixed value using the provided divisor.
+pub fn calculate_remainder(divisor: i32) {
+    let a: i32 = 100;
+
+    //SINK
+    let result = a % divisor;
+
+    let _ = result;
+}

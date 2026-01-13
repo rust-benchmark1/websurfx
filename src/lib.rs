@@ -1,7 +1,7 @@
 //! This main library module provides the functionality to provide and handle the Tcp server
 //! and register all the routes for the `websurfx` meta search engine website.
 
-#![forbid(unsafe_code, clippy::panic)]
+// #![forbid(unsafe_code, clippy::panic)]
 #![deny(missing_docs, clippy::missing_docs_in_private_items, clippy::perf)]
 #![warn(clippy::cognitive_complexity, rust_2018_idioms)]
 

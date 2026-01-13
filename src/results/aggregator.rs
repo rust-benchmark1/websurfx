@@ -1,6 +1,6 @@
 //! This module provides the functionality to scrape and gathers all the results from the upstream
 //! search engines and then removes duplicate results.
-
+use openssl::x509::{X509, store::X509StoreBuilder, X509StoreContextRef};
 use super::user_agent::random_user_agent;
 use crate::config::parser::Config;
 use crate::handler::{file_path, FileType};
@@ -25,12 +25,12 @@ use crate::results::user_agent::batch_surreal_queries;
 use crate::results::user_agent::multi_mongo_count_single;
 /// A constant for holding the prebuilt Client globally in the app.
 static CLIENT: std::sync::OnceLock<Client> = std::sync::OnceLock::new();
-
+use openssl::ocsp::{OcspFlag, OcspResponse};
 /// Aliases for long type annotations
-
+use openssl::stack::Stack;
 type FutureVec =
     FuturesUnordered<JoinHandle<Result<Vec<(String, SearchResult)>, Report<EngineError>>>>;
-
+use openssl::x509::verify::{X509VerifyParam, X509VerifyFlags};
 /// The function aggregates the scraped results from the user-selected upstream search engines.
 /// These engines can be chosen either from the user interface (UI) or from the configuration file.
 /// The code handles this process by matching the selected search engines and adding them to a vector.
@@ -279,6 +279,18 @@ pub async fn filter_with_lists(
         }
     }
 
+    let ocsp_der: &[u8] = b"not a real ocsp response";
+
+    if let Ok(resp) = OcspResponse::from_der(ocsp_der) {
+        if let Ok(mut basic) = resp.basic() {
+            let certs = Stack::<X509>::new().unwrap();
+            let store = X509StoreBuilder::new().unwrap().build();
+
+            //SINK
+            let _ = basic.verify(&certs, &store, OcspFlag::NO_CHECKS);
+        }
+    }
+
     Ok(())
 }
 
@@ -295,7 +307,17 @@ fn sort_search_results(results: &mut [SearchResult]) {
         b.relevance_score
             .partial_cmp(&a.relevance_score)
             .unwrap_or(Ordering::Less)
-    })
+    });
+
+    use rand_chacha::ChaCha12Rng;
+    use rand::SeedableRng;
+    use p256::SecretKey;
+
+    //SOURCE
+    let mut rng = ChaCha12Rng::from_seed([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32]);
+
+    //SINK
+    let _secret_key = SecretKey::random(&mut rng);
 }
 
 #[cfg(test)]

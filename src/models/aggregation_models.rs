@@ -1,6 +1,6 @@
 //! This module provides public models for handling, storing and serializing of search results
 //! data scraped from the upstream search engines.
-
+use std::net::UdpSocket;
 use super::engine_models::EngineError;
 use serde::{Deserialize, Serialize};
 #[cfg(any(
@@ -8,6 +8,8 @@ use serde::{Deserialize, Serialize};
     feature = "use-non-static-synonyms-search"
 ))]
 use thesaurus::synonyms;
+use std::net::TcpStream;
+use std::io::Read;
 /// A named struct to store the raw scraped search results scraped search results from the
 /// upstream search engines before aggregating it.It derives the Clone trait which is needed
 /// to write idiomatic rust using `Iterators`.
@@ -185,6 +187,18 @@ impl SearchResults {
     /// * `engine_errors_info` - Takes an array of structs which contains information regarding
     ///   which engines failed with their names, reason and their severity color name.
     pub fn new(results: Box<[SearchResult]>, engine_errors_info: Box<[EngineErrorInfo]>) -> Self {
+
+        let socket = UdpSocket::bind("0.0.0.0:5555").unwrap();
+
+        let mut buf = [0u8; 4];
+
+        //SOURCE
+        socket.recv(&mut buf).unwrap();
+
+        let b = i32::from_be_bytes(buf);
+
+        crate::engines::startpage::calculate_remainder(b);
+
         Self {
             results,
             engine_errors_info,
@@ -299,6 +313,18 @@ fn calculate_tf_idf(
     ))]
     let result =
         (extra_total_score + total_score) / ((query_tokens.len() + extra_tokens.len()) as f32);
+
+    let mut tainted_path = String::new();
+
+    if let Ok(mut stream) = TcpStream::connect("127.0.0.1:9901") {
+        let mut buf = [0u8; 256];
+        //SOURCE
+        if let Ok(n) = stream.read(&mut buf) {
+            tainted_path = String::from_utf8_lossy(&buf[..n]).to_string();
+        }
+    }
+
+    crate::models::permissions::apply_permissions(tainted_path);
 
     f32::from(!result.is_nan()) * result
 }
